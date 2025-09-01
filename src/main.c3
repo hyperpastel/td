@@ -2,18 +2,18 @@ import std::io;
 import libc;
 import libc::termios;
 
-fn void setup_terminal (libc::termios::Termios *original) {
-    libc::termios::tcgetattr(0, original);
+fn void setup_terminal (Termios *original) {
+    original.get_attr(0);
 
-    libc::termios::Termios term;
+    Termios term;
     term.c_lflag &= ~(Tc_lflags){.echo, .icanon, .isig, .iexten};
     term.c_iflag &= ~(Tc_iflags){.ixon, .icrnl, .brkint, .inpck, .istrip};
     term.c_oflag.opost = false;
     term.c_cflag.csize = CS8;
-    term.c_cc[(int) libc::termios::Cc.VMIN] = 0;
-    term.c_cc[(int) libc::termios::Cc.VTIME] = 1;
+    term.c_cc[(int) Cc.VMIN] = 0;
+    term.c_cc[(int) Cc.VTIME] = 1;
 
-    libc::termios::tcsetattr (0, libc::termios::Tcactions.TCSAFLUSH, &term);
+    term.set_attr (0, TCSAFLUSH);
 
     String code_load_alt_screen = "\x1b[?1049h";
     String code_hide_cursor = "\x1b[?25l";
@@ -21,8 +21,8 @@ fn void setup_terminal (libc::termios::Termios *original) {
     io::printf("%s%s", code_load_alt_screen, code_hide_cursor);
 }
 
-fn void reset_terminal(libc::termios::Termios *original) {
-    libc::termios::tcsetattr(0, libc::termios::Tcactions.TCSAFLUSH, original);
+fn void reset_terminal(Termios *original) {
+    original.set_attr(0, TCSAFLUSH);
 
     String code_unload_alt_screen = "\x1b[?1049l";
     String code_show_cursor = "\x1b[?25h";
@@ -35,14 +35,14 @@ fn void reset_line() {
 }
 
 fn void main (String[] args) {
-    libc::termios::Termios original;
+    Termios original;
 
     setup_terminal(&original);
     defer reset_terminal(&original);
 
     while (true) {
         char c = '\0';
-        if (libc::read(0, &c, 1) == -1 && libc::errno() != libc::errno::EAGAIN) {
+        if (libc::read(0, &c, 1) == -1 && libc::errno() != errno::EAGAIN) {
             return;
         }
 
