@@ -7,8 +7,8 @@ struct Task {
     bool completed;
 }
 
-fn void Task.toggle (Task *task) {
-    task.completed = !task.completed;
+fn void Task.toggle (&self) {
+    self.completed = !self.completed;
 }
 
 alias TaskList = List { Task };
