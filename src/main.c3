@@ -1,56 +1,61 @@
+import application;
+import winsize;
+import task;
+
 import std::io;
+import std::thread;
+import std::time;
+
 import libc;
 import libc::termios;
 
-fn void setup_terminal (Termios *original) {
-    original.get_attr(0);
-
-    Termios term;
-    term.c_lflag &= ~(Tc_lflags){.echo, .icanon, .isig, .iexten};
-    term.c_iflag &= ~(Tc_iflags){.ixon, .icrnl, .brkint, .inpck, .istrip};
-    term.c_oflag.opost = false;
-    term.c_cflag.csize = CS8;
-    term.c_cc[(int) Cc.VMIN] = 0;
-    term.c_cc[(int) Cc.VTIME] = 1;
-
-    term.set_attr (0, TCSAFLUSH);
-
-    String code_load_alt_screen = "\x1b[?1049h";
-    String code_hide_cursor = "\x1b[?25l";
-
-    io::printf("%s%s", code_load_alt_screen, code_hide_cursor);
-}
-
-fn void reset_terminal(Termios *original) {
-    original.set_attr(0, TCSAFLUSH);
-
-    String code_unload_alt_screen = "\x1b[?1049l";
-    String code_show_cursor = "\x1b[?25h";
-
-    io::printf("%s%s", code_unload_alt_screen, code_show_cursor);
-}
-
-fn void reset_line() {
-    io::print("\x1b[2K\r");
-}
-
 fn void main (String[] args) {
-    Termios original;
 
-    setup_terminal(&original);
-    defer reset_terminal(&original);
+    Task [] tasks = {
+       (Task){ .text = "am-a-do", .completed = true },
+       (Task){ .text = "one love / people get ready", .completed = true },
+       (Task){ .text = "is this love", .completed = true },
+       (Task){ .text = "i shot the sheriff", .completed = true },
+       (Task){ .text = "could you be loved", .completed = true },
+       (Task){ .text = "stop that train - jamaican version", .completed = true },
+       (Task){ .text = "buffalo soldier", .completed = true },
+       (Task){ .text = "natty dread", .completed = true },
+       (Task){ .text = "pass it on", .completed = true },
+       (Task){ .text = "kinky reggae", .completed = true },
+       (Task){ .text = "so much trouble in the world", .completed = true },
+       (Task){ .text = "waiting in vain", .completed = true },
+       (Task){ .text = "satisfy my soul", .completed = true },
+       (Task){ .text = "small axe", .completed = true },
+    };
 
+    Application app;   
+    app.setup_terminal();
+    defer app.reset_terminal();
+
+    app.set_task_length(10);
+    app.set_window_size();
+
+    app.tasks.init_with_array(tmem, tasks);
+
+    char c;
     while (true) {
-        char c = '\0';
-        if (libc::read(0, &c, 1) == -1 && libc::errno() != errno::EAGAIN) {
+        c = '\0';
+        if (libc::read(libc::STDIN_FD, &c, 1) == -1 && libc::errno() != errno::EAGAIN) {
             return;
         }
 
-        if (c == 'q') {
-            return;
-        }
+        switch (c) {
+            case 'j': 
+                app.scroll_down();
+            case 'k':
+                app.scroll_up();
+            case 'q':
+                return;
+            case 't':
+                app.toggle_current();
+            };
 
-        reset_line();
+        io::printf("%s", app.render(tmem));
         libc::fflush(libc::stdout());
     }
 }
