@@ -24,6 +24,8 @@
           buildInputs = [
             inputs.c3c.packages.${system}.default
             c3-lsp
+            valgrind
+            gdb
           ];
 
           shellHook = ''
