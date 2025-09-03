@@ -1,5 +1,28 @@
 {
   "nodes": {
+    "c3c": {
+      "inputs": {
+        "flake-utils": [
+          "flake-utils"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1756854145,
+        "narHash": "sha256-CSdjuU8dVCACDdu30Gd/KJgzRPEUlS27JnPTcKLz8qU=",
+        "owner": "c3lang",
+        "repo": "c3c",
+        "rev": "8795ffc4f12360fe676e037db0a80096280cfd76",
+        "type": "github"
+      },
+      "original": {
+        "owner": "c3lang",
+        "repo": "c3c",
+        "type": "github"
+      }
+    },
     "flake-utils": {
       "inputs": {
         "systems": "systems"
@@ -36,6 +59,7 @@
     },
     "root": {
       "inputs": {
+        "c3c": "c3c",
         "flake-utils": "flake-utils",
         "nixpkgs": "nixpkgs"
       }
